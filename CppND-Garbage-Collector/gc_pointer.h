@@ -102,8 +102,7 @@ bool Pointer<T, size>::first = true;
 template<class T,int size>
 Pointer<T,size>::Pointer(T *t){
     // Register shutdown() as an exit function.
-    if (first)
-        atexit(shutdown);
+    if (first) atexit(shutdown);
     first = false;
     typename std::list<PtrDetails<T> >::iterator p = findPtrInfo(t);
     if(p == refContainer.end()){
@@ -117,8 +116,8 @@ Pointer<T,size>::Pointer(T *t){
         p->refcount++;
     }
     this->addr = t;
-
 }
+
 // Copy constructor.
 template< class T, int size>
 Pointer<T,size>::Pointer(const Pointer &ob){
@@ -128,10 +127,7 @@ Pointer<T,size>::Pointer(const Pointer &ob){
     p->refcount++; // increment ref count
     addr = ob.addr;
     arraySize = ob.arraySize;
-    if (arraySize > 0)
-        isArray = true;
-    else
-        isArray = false;
+    isArray = (arraySize > 0)? true:false;
 }
 
 // Destructor for Pointer.
@@ -154,25 +150,15 @@ bool Pointer<T, size>::collect(){
     bool memfreed = false;
     typename std::list<PtrDetails<T> >::iterator p;
     do{
-        // Scan refContainer looking for unreferenced pointers.
         for (p = refContainer.begin(); p != refContainer.end(); p++){
-            // If in-use, skip.
             if (p->refcount > 0)
                 continue;
             memfreed = true;
-            // Remove unused entry from refContainer.
             refContainer.remove(*p);
-
-            // Free memory unless the Pointer is null.
             if (p->memPtr){
-                if (p->isArray){
-                    delete[] p->memPtr; // delete array
-                }
-                else{
-                    delete p->memPtr; // delete single element
-                }
+                if (p->isArray) delete[] p->memPtr;
+                else delete p->memPtr; 
             }
-            // Restart the search.
             break;
         }
     } while (p != refContainer.end());
@@ -204,15 +190,11 @@ T *Pointer<T, size>::operator=(T *t){
 template <class T, int size>
 Pointer<T, size> &Pointer<T, size>::operator=(Pointer &rv){
 typename std::list<PtrDetails<T> >::iterator p;
-    // First, decrement the reference count
-    // for the memory currently being pointed to.
     p = findPtrInfo(addr);
     p->refcount--;
-    // Next, increment the reference count of
-    // the new address.
     p = findPtrInfo(rv.addr);
-    p->refcount++;  // increment ref count
-    addr = rv.addr; // store the address.
+    p->refcount++; 
+    addr = rv.addr; 
     return rv;
 
 }

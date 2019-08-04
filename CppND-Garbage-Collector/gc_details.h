@@ -22,8 +22,7 @@ array, then arraySize contains its size */
     {
         refcount = 1;
         memPtr = m_ptr;
-        if (size != 0) isArray = true;
-        else isArray = false;
+        isArray = (size != 0)? true:false;
         arraySize = size;
     }
 };
